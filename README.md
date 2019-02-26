@@ -1,4 +1,4 @@
-To run index.js, Express.js and Node.js should be installed in the path. If you run the code on localhost, the address should be "localhost:3000". If you run it on our server, the address should be http://3.93.183.130:3000/
+To run index.js, Express.js and Node.js should be installed in the path. If you run the code on localhost, the address should be "localhost:3000". If you run it on our server, the address should be "http://3.93.183.130:3000/"
 
 Install NVM 
     
@@ -26,3 +26,4 @@ Run code
 
     $node index.js
 
+Node.js and Express.js and rethinkdb have already been installed on our server. You just need the final step to run the code if you run the code on server. 
