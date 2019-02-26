@@ -16,7 +16,7 @@ r.connect( obj2, function(err, conn) {//connect to the database
 });
 
 //the function below is just for test, will be replaced later by more specific api calls and functions
-//once the code is running, the address http://3.93.183.130:3000/ will return:
+//once the code is running on server, the address http://3.93.183.130:3000/ will return:
 //'[ { "email": "piyue@live.unc.edu", "number": 9195993474, "password": "lalala", "user_id": 1, "username": "piyue" } ]'
 app.get('/', (req, res) => {
     r.db("Weatherwayz").table('Users').
