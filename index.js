@@ -68,7 +68,7 @@ app.get('/users/:user_id',(req, res) => {
 })
 
 //login as a user with number and password
-//return null if user not found, false if password wrong and true if password correct
+//return null if user not found, 0 if password wrong and user_id if password correct
 app.get('/login',(req, res) => {
     weatherwayz.table('Users').getAll(parseInt(req.query.number), {index:"number"}).
     run(connection, function(err, result) {
@@ -78,11 +78,11 @@ app.get('/login',(req, res) => {
         } else {
             let temp_user = result._responses[0].r[0]
             if (req.query.password === temp_user.password){
-                res.json(true)
+                res.json(temp_user.user_id)
             } else {
-                res.json(false);
+                res.json(0);
             }
-        }
+	}
     });
 })
 
