@@ -15,6 +15,7 @@ Install Express.js
 
     $ npm init
     $ npm install express --save-dev
+    $ npm install body-parser --save
 Just use the default settings when installing and use $ ls to check if you have node_modules directory and package.json after you install
 
 Install rethinkdb
