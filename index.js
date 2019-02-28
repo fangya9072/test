@@ -17,8 +17,6 @@ var obj2 = {host: '34.204.183.169', port: 28015, user: 'admin'};
 var connection = null;
 r.connect( obj2, function(err, conn) {
     if (err){
-	console.log("cannot connect");
-        console.log(err);
         throw err;
     }
     connection = conn;
@@ -59,7 +57,6 @@ app.route('/users')
     });
 })
 
-
 //get information of a specific user with its user_id
 //if the user_id does not exist, it returns null
 app.get('/users/:user_id',(req, res) => {
@@ -70,5 +67,23 @@ app.get('/users/:user_id',(req, res) => {
     });
 })
 
+//login as a user with number and password
+//return null if user not found, false if password wrong and true if password correct
+app.get('/login',(req, res) => {
+    weatherwayz.table('Users').getAll(parseInt(req.query.number), {index:"number"}).
+    run(connection, function(err, result) {
+        if (err) res.send(err);
+        if (result._responses.length == 0) {
+            res.json(null);
+        } else {
+            let temp_user = result._responses[0].r[0]
+            if (req.query.password === temp_user.password){
+                res.json(true)
+            } else {
+                res.json(false);
+            }
+        }
+    });
+})
 
 app.listen(3000, () => console.log('Server running on port 3000'))
