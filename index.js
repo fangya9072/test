@@ -62,7 +62,12 @@ app.route('/users/:username')
 })
 //update users location coordinate
 .post((req, res) => {
-    
+    weatherwayz.table('Users').get(req.params.username).update({
+        location: req.query.location
+    }).run(connection, function(err, result) {
+        if(err) res.send(err);
+        res.json(result);
+    })
 })
 
 //login as a user with username and password
