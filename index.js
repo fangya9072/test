@@ -60,11 +60,11 @@ app.route('/users/:username')
         res.json(result);
     })
 })
-//update users location coordinate
+//update users location coordinate or other information(not username)
 .post((req, res) => {
-    weatherwayz.table('Users').get(req.params.username).update({
-        location: req.query.location
-    }).run(connection, function(err, result) {
+    weatherwayz.table('Users').get(req.params.username).update(
+        req.body
+    ).run(connection, function(err, result) {
         if(err) res.send(err);
         res.json(result);
     })
