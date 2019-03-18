@@ -13,6 +13,7 @@ app.use(function(req, res, next) {
 
 //connect to our database
 var r = require("rethinkdb");
+//database server address
 var obj2 = {host: '34.204.183.169', port: 28015, user: 'admin'};
 var connection = null;
 r.connect( obj2, function(err, conn) {
@@ -32,21 +33,12 @@ app.get('/', (req, res) => {
 
 app.route('/users')
 //create a new user in database
-.post((req, res)=>{
-    var max;
-    weatherwayz.table('Users').max("user_id").
-    run(connection, function(err, result){
-        //generate user_id that is the largest in all existing users
-        max = result.user_id
-        req.body.user_id = max + 1;
-        req.body.number = parseInt(req.body.number);
-
-        weatherwayz.table('Users').insert(req.body).
+.put((req, res) => {
+    weatherwayz.table('Users').insert(req.body).
         run(connection, function(err, result){
             if (err) res.send(err);
-            res.json(result)
+            res.json(result);
         })
-    })
 })
 //get ALL users and their information in database
 .get((req, res) => {
@@ -57,30 +49,35 @@ app.route('/users')
     });
 })
 
-//get information of a specific user with its user_id
-//if the user_id does not exist, it returns null
-app.get('/users/:user_id',(req, res) => {
-    weatherwayz.table('Users').get(parseInt(req.params.user_id)).
+//functions for a specific user
+app.route('/users/:username')
+//get information of a specific user with its username
+//if the username does not exist, it returns null
+.get((req, res) => {
+    weatherwayz.table('Users').get(req.params.username).
     run(connection, function(err, result) {
         if (err) res.send(err);
         res.json(result);
-    });
+    })
+})
+//update users location coordinate
+.post((req, res) => {
+    
 })
 
-//login as a user with number and password
-//return null if user not found, 0 if password wrong and user_id if password correct
+//login as a user with username and password
+//return null if username not found, false if password wrong and true if password correct
 app.get('/login',(req, res) => {
-    weatherwayz.table('Users').getAll(parseInt(req.query.number), {index:"number"}).
+    weatherwayz.table('Users').get(req.query.username).
     run(connection, function(err, result) {
         if (err) res.send(err);
-        if (result._responses.length == 0) {
-            res.json(null);
+        if (result == null) {
+            res.json(null)
         } else {
-            let temp_user = result._responses[0].r[0]
-            if (req.query.password === temp_user.password){
-                res.json(temp_user.user_id)
+            if (req.query.password === result.password){
+                res.json(true)
             } else {
-                res.json(0);
+                res.json(false)
             }
 	}
     });
