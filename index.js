@@ -8,6 +8,7 @@ app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "null");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     res.header("Access-Control-Allow-Credentials", "true");
+    res.header("Access-Control-Allow-Methods" , "*");
     next();
 });
 
@@ -35,12 +36,12 @@ app.route('/users')
 //create a new user in database
 .put((req, res) => {
     weatherwayz.table('Users').insert(req.body).
-        run(connection, function(err, result){
-            if (err) res.send(err);
-            res.json(result);
-        })
+    run(connection, function(err, result){
+        if (err) res.send(err);
+        res.json(result);
+    })
 })
-//get ALL users and their information in database
+//get ALL users and their information in database, for test only
 .get((req, res) => {
     weatherwayz.table('Users').
     run(connection, function(err, result) {
@@ -84,8 +85,41 @@ app.get('/login',(req, res) => {
             } else {
                 res.json(false)
             }
-	}
+	    }
     });
+})
+
+//------api calls for table "OutlookPosts"------
+
+app.route('/outlookposts')
+//get ALL outlook posts
+.get((req, res) => {
+    weatherwayz.table('OutlookPosts').
+    run(connection, function(err, result) {
+        if (err) res.send(err);
+        res.json(result._responses[0].r)
+    });
+})
+
+//functions for a specific user
+app.route('/outlookposts/:username')
+//get all posts for a specific user
+.get((req, res) => {
+    weatherwayz.table('OutlookPosts').getAll(req.params.username, {index: 'username'}).
+    run(connection, function(err, result) {
+        if (err) res.send(err);
+        if (result._responses.length == 0) res.json(result._responses)
+        else res.json(result._responses[0].r);
+    })
+})
+//create a new outlook post in table
+.put((req, res) => {
+    req.body.username = req.params.username;
+    weatherwayz.table('OutlookPosts').insert(req.body).
+    run(connection, function(err, result){
+        if (err) res.send(err);
+        res.json(result);
+    })
 })
 
 app.listen(3000, () => console.log('Server running on port 3000'))
