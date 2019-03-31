@@ -38,7 +38,7 @@ app.route('/users')
     weatherwayz.table('Users').insert(req.body).
     run(connection, function(err, result){
         if (err) res.send(err);
-        res.json(result);
+        else res.json(result);
     })
 })
 //get ALL users and their information in database, for test only
@@ -46,7 +46,7 @@ app.route('/users')
     weatherwayz.table('Users').
     run(connection, function(err, result) {
         if (err) res.send(err);
-        res.json(result._responses[0].r)
+        else res.json(result._responses[0].r)
     });
 })
 
@@ -58,7 +58,7 @@ app.route('/users/:username')
     weatherwayz.table('Users').get(req.params.username).
     run(connection, function(err, result) {
         if (err) res.send(err);
-        res.json(result);
+        else res.json(result);
     })
 })
 //update users location coordinate or other information(not username)
@@ -67,7 +67,7 @@ app.route('/users/:username')
         req.body
     ).run(connection, function(err, result) {
         if(err) res.send(err);
-        res.json(result);
+        else res.json(result);
     })
 })
 
@@ -97,19 +97,19 @@ app.route('/outlookposts')
     weatherwayz.table('OutlookPosts').
     run(connection, function(err, result) {
         if (err) res.send(err);
-        res.json(result._responses[0].r)
+        else res.json(result._responses[0].r)
     });
 })
 
 //functions for a specific user
 app.route('/outlookposts/:username')
-//get all posts for a specific user
+//get outfit posts for a specific user
 .get((req, res) => {
-    weatherwayz.table('OutlookPosts').getAll(req.params.username, {index: 'username'}).
+    weatherwayz.table('OutlookPosts').getAll(
+        req.params.username, {index: 'username'}).orderBy('date').
     run(connection, function(err, result) {
         if (err) res.send(err);
-        if (result._responses.length == 0) res.json(result._responses)
-        else res.json(result._responses[0].r);
+        else res.json(result);
     })
 })
 //create a new outlook post in table
@@ -118,8 +118,44 @@ app.route('/outlookposts/:username')
     weatherwayz.table('OutlookPosts').insert(req.body).
     run(connection, function(err, result){
         if (err) res.send(err);
-        res.json(result);
+        else res.json(result);
     })
 })
+
+//------api calls for table "WeatherPosts"------
+
+//functions for a specific user
+app.route('/weatherposts/:username')
+//get weather posts of a specific user
+.get((req, res) => {
+    weatherwayz.table('WeatherPosts').getAll(
+        req.params.username, {index: 'username'}).orderBy('date').
+    run(connection, function(err, result) {
+        if (err) res.send(err);
+        else res.json(result);
+    })
+})
+//create a new weather post in table
+.put((req, res) => {
+    req.body.username = req.params.username;
+    weatherwayz.table('WeatherPosts').insert(req.body).
+    run(connection, function(err, result){
+        if (err) res.send(err);
+        else res.json(result);
+    })
+})
+
+app.get('/allposts/:username', (req, res) => {
+    weatherwayz.table('WeatherPosts').getAll(
+        req.params.username, {index: 'username'}).union(
+            weatherwayz.table('OutlookPosts').getAll(
+            req.params.username, {index: 'username'})
+        ).orderBy('date').
+    run(connection, function(err, result){
+        if (err) res.send(err)
+        else res.json(result)
+    })
+})
+
 
 app.listen(3000, () => console.log('Server running on port 3000'))
