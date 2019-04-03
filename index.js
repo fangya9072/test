@@ -152,7 +152,7 @@ app.delete('/allposts/:post_id', (req, res) => {
         if (err) res.send(err);
         else if (result.deleted) res.send(result);
         else {
-            weatherwayz.table('OutlookPosts').get(req.params.id).delete().
+            weatherwayz.table('OutlookPosts').get(req.params.post_id).delete().
             run(connection, function(err, result){
                 if (err) res.send(err);
                 else res.send(result);
