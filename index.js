@@ -122,6 +122,15 @@ app.route('/outlookposts/:username')
     })
 })
 
+//delete an outlook post with its outlook_post_id
+app.delete('/outlookposts/:id', (req, res) => {
+    weatherwayz.table('OutlookPosts').get(req.params.id).delete().
+    run(connection, function(err, result){
+        if (err) res.send(err);
+        else res.json(result);
+    })
+})
+
 //------api calls for table "WeatherPosts"------
 
 //functions for a specific user
@@ -145,6 +154,16 @@ app.route('/weatherposts/:username')
     })
 })
 
+//delete an outlook post with its outlook_post_id
+app.delete('/weatherposts/:id', (req, res) => {
+    weatherwayz.table('WeatherPosts').get(req.params.id).delete().
+    run(connection, function(err, result){
+        if (err) res.send(err);
+        else res.json(result);
+    })
+})
+
+//get all weather and outlook posts from database
 app.get('/allposts/:username', (req, res) => {
     weatherwayz.table('WeatherPosts').getAll(
         req.params.username, {index: 'username'}).union(
@@ -156,6 +175,9 @@ app.get('/allposts/:username', (req, res) => {
         else res.json(result)
     })
 })
+
+//------api calls for table "FriendRequests"------
+
 
 
 app.listen(3000, () => console.log('Server running on port 3000'))
