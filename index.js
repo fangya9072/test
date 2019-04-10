@@ -176,6 +176,32 @@ app.get('/allposts/:username', (req, res) => {
 
 //------api calls for table "FriendRequests"------
 
+app.route('/friendrequests')
+//generate a new friend request between two users
+.put((req, res) => {
+    weatherwayz.table('FriendRequests').insert(req.body).
+    run(connection, function(err, result){
+        if (err) res.send(err)
+        else res.json(result)
+    })
+})
+//confirm adding friend from another user
+.post((req, res) => {
+})
+//delete a friend request, meaning rejection
+.delete((req, res) => {
+})
 
+//get a list of friends for a specific user
+app.get('/friendlist/:username', (req, res) => {
+    let t = weatherwayz.table('FriendRequests').getAll(true, {index: 'status'})
+    t.filter({user_from_id: req.params.username})('user_to_id').union(
+        t.filter({user_to_id: req.params.username})('user_from_id')
+    ).distinct().
+    run(connection, function(err, result){
+        if (err) res.send(err)
+        else res.json(result)
+    })
+})
 
 app.listen(3000, () => console.log('Server running on port 3000'))
