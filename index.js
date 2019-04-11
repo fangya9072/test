@@ -178,8 +178,20 @@ app.get('/allposts/:username', (req, res) => {
 
 app.route('/friendrequests/:username')
 //generate a new friend request between two users
+//return false if such request already existed, a table with "inserted": 1 means success
 .put((req, res) => {
-    
+    req.body.user_from_id = req.params.username
+    let t = weatherwayz.table('FriendRequests').getAll(req.body.user_from_id, {index: "user_from_id"})
+    t('user_to_id').contains(req.body.user_to_id).
+    run(connection, function(err, result){
+        if (!result){
+            weatherwayz.table('FriendRequests').insert(req.body).
+            run(connection, function(err, result){
+                if (err) res.send(err)
+                else res.json(result)
+            })
+        } else res.json(false)
+    })
 })
 //get a list of friend requests waiting to be handled
 .get((req, res) => {
