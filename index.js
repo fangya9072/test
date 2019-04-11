@@ -176,20 +176,40 @@ app.get('/allposts/:username', (req, res) => {
 
 //------api calls for table "FriendRequests"------
 
-app.route('/friendrequests')
+app.route('/friendrequests/:username')
 //generate a new friend request between two users
 .put((req, res) => {
-    weatherwayz.table('FriendRequests').insert(req.body).
+    
+})
+//get a list of friend requests waiting to be handled
+.get((req, res) => {
+    let t = weatherwayz.table('FriendRequests').getAll(false, {index: 'status'})
+    t.filter({user_to_id: req.params.username}).distinct().
     run(connection, function(err, result){
         if (err) res.send(err)
         else res.json(result)
     })
 })
+
+app.route('/friendrequests/:request_id')
 //confirm adding friend from another user
 .post((req, res) => {
+    weatherwayz.table('FriendRequests').get(req.params.request_id).update(
+        {
+            "status": true
+        }
+    ).run(connection, function(err, result){
+        if (err) res.send(err)
+        else res.json(result)
+    })
 })
 //delete a friend request, meaning rejection
 .delete((req, res) => {
+    weatherwayz.table('FriendRequests').get(req.params.request_id).delete().
+    run(connection, function(err, result){
+        if (err) res.send(err);
+        else res.json(result)
+    })
 })
 
 //get a list of friends for a specific user
