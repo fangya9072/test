@@ -182,7 +182,10 @@ app.route('/friendrequests/:username')
 .put((req, res) => {
     req.body.user_from_id = req.params.username
     let t = weatherwayz.table('FriendRequests').getAll(req.body.user_from_id, {index: "user_from_id"})
-    t('user_to_id').contains(req.body.user_to_id).
+    t('user_to_id').union(
+        weatherwayz.table('FriendRequests').getAll(req.body.user_from_id, {index: "user_to_id"})
+        ('user_from_id')
+    ).contains(req.body.user_to_id).
     run(connection, function(err, result){
         if (!result){
             weatherwayz.table('FriendRequests').insert(req.body).
@@ -224,8 +227,9 @@ app.route('/friendrequests/:request_id')
     })
 })
 
+app.route('/friendlist/:username')
 //get a list of friends for a specific user
-app.get('/friendlist/:username', (req, res) => {
+.get((req, res) => {
     let t = weatherwayz.table('FriendRequests').getAll(true, {index: 'status'})
     t.filter({user_from_id: req.params.username})('user_to_id').union(
         t.filter({user_to_id: req.params.username})('user_from_id')
@@ -234,6 +238,48 @@ app.get('/friendlist/:username', (req, res) => {
         if (err) res.send(err)
         else res.json(result)
     })
+})
+//delete a friend from friendlist
+.delete((req, res) => {
+    let t = weatherwayz.table('FriendRequests').getAll(true, {index: 'status'})
+    t.filter(function(doc){
+        return doc('user_from_id').eq(req.params.username).and(doc('user_to_id').eq(req.query.user2))
+    }).union(
+        t.filter(function(doc){
+            return doc('user_to_id').eq(req.params.username).and(doc('user_from_id').eq(req.query.user2))
+        }
+        )
+    )('id').distinct()
+    .run(connection, function(err, result){
+        weatherwayz.table('FriendRequests').get(result[0]).delete().
+        run(connection, function(err, result){
+            if (err) res.send(err)
+            else res.json(result)
+        })
+    })
+})
+
+//check if 2 users are friends
+app.get('/checkfriend/:username', (req, res) => {
+    let t = weatherwayz.table('FriendRequests')
+    t.filter(function(doc){
+        return doc('user_from_id').eq(req.params.username).and(doc('user_to_id').eq(req.query.user2))
+    }).union(
+        t.filter(function(doc){
+            return doc('user_to_id').eq(req.params.username).and(doc('user_from_id').eq(req.query.user2))
+        }
+        )
+    ).distinct()
+    .run(connection, function(err, result){
+        if (err) res.send(err)
+        if (result.length == 0) res.json(null)
+        else res.send(result[0].status)
+    })
+})
+
+//get notification of receiving a request
+app.get('/requestsnotifications/:username', (req, res) => {
+    
 })
 
 app.listen(3000, () => console.log('Server running on port 3000'))
