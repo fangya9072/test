@@ -95,6 +95,24 @@ app.get('/login',(req, res) => {
     });
 })
 
+//search function, return all users that fit in the search index
+//return null if no such user
+app.get('/search', (req, res) => {
+    weatherwayz.table('Users').getAll(req.query.index).union(
+        weatherwayz.table('Users').filter({number: req.query.index})
+      ).union(
+        weatherwayz.table('Users').filter({email: req.query.index})
+      )('username').distinct().
+      run(connection, function(err, result) {
+          if (err) res.send(err);
+          else if (result.length == 0){
+              res.json(null)
+          } else {
+              res.json(result)
+          }
+      })
+})
+
 //------api calls for table "OutlookPosts"------
 
 app.route('/outlookposts')
