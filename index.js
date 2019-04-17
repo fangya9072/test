@@ -62,6 +62,7 @@ app.route('/users/:username')
 //if the username does not exist, it returns null
 .get((req, res) => {
     weatherwayz.table('Users').get(req.params.username).
+    pluck('username', 'email', 'number', 'image', 'location').
     run(connection, function(err, result) {
         if (err) res.send(err);
         else res.json(result);
@@ -102,7 +103,7 @@ app.get('/search', (req, res) => {
         weatherwayz.table('Users').filter({number: req.query.index})
       ).union(
         weatherwayz.table('Users').filter({email: req.query.index})
-      )('username').distinct().
+      ).pluck('username', 'email', 'number', 'image', 'location').distinct().
       run(connection, function(err, result) {
           if (err) res.send(err);
           else if (result.length == 0){
