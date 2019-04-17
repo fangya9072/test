@@ -35,10 +35,16 @@ app.get('/', (req, res) => {
 app.route('/users')
 //create a new user in database
 .put((req, res) => {
-    weatherwayz.table('Users').insert(req.body).
+    weatherwayz.table('Users').getAll(req.body.email, {index: 'email'}).
+    union(weatherwayz.table('Users').getAll(req.body.number, {index: 'number'})).
     run(connection, function(err, result){
-        if (err) res.send(err);
-        else res.json(result);
+        if (result._responses.length == 0) {
+            weatherwayz.table('Users').insert(req.body).
+            run(connection, function(err, result){
+                if (err) res.send(err);
+                else res.json(result);
+            })
+        } else res.json(false)
     })
 })
 //get ALL users and their information in database, for test only
@@ -275,11 +281,6 @@ app.get('/checkfriend/:username', (req, res) => {
         if (result.length == 0) res.json(null)
         else res.send(result[0].status)
     })
-})
-
-//get notification of receiving a request
-app.get('/requestsnotifications/:username', (req, res) => {
-    
 })
 
 app.listen(3000, () => console.log('Server running on port 3000'))
