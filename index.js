@@ -147,6 +147,17 @@ app.route('/outlookposts/:username')
     })
 })
 
+//get the most recent outfit post of a user
+app.get('/recentpost/:username', (req, res) => {
+    weatherwayz.table('OutlookPosts').getAll(
+        req.params.username, {index: 'username'})
+    .orderBy(r.desc('date')).limit(1).
+    run(connection, function(err, result) {
+        if (err) res.send(err);
+        else res.json(result);
+    })
+})
+
 //------api calls for table "WeatherPosts"------
 
 //functions for a specific user
