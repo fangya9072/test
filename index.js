@@ -103,7 +103,7 @@ app.get('/search', (req, res) => {
         weatherwayz.table('Users').filter({number: req.query.index})
       ).union(
         weatherwayz.table('Users').filter({email: req.query.index})
-      ).pluck('username', 'email', 'number', 'image', 'location').distinct().
+      ).without('password').distinct().
       run(connection, function(err, result) {
           if (err) res.send(err);
           else if (result.length == 0){
@@ -228,7 +228,11 @@ app.get('/post/:post_id', (req, res) => {
 
 //get weather posts within 24hr and indicated coordinate range
 app.get('/rangeposts', (req, res) => {
-    let requestDate = req.body.date.split('-');
+    let requestDate = req.query.date.split('-');
+    let min_latitude = parseFloat(req.query.min_latitude);
+    let max_latitude = parseFloat(req.query.max_latitude);
+    let min_longitude = parseFloat(req.query.min_longitude);
+    let max_longitude = parseFloat(req.query.max_longitude);
     for (let i=0; i < requestDate.length; i++){
         requestDate[i] = parseInt(requestDate[i], 10)
     }
@@ -264,15 +268,15 @@ app.get('/rangeposts', (req, res) => {
     }
 
     weatherwayz.table('WeatherPosts').between(
-        rangeDate, req.body.date, {index: 'date', leftBound: 'closed', rightBound: 'closed'}
+        rangeDate, req.query.date, {index: 'date', leftBound: 'closed', rightBound: 'closed'}
     ).coerceTo('array').setIntersection(
         weatherwayz.table('WeatherPosts').between(
-            req.body.mapRange.min_latitude, req.body.mapRange.max_latitude, 
+            min_latitude, max_latitude, 
             {index: 'latitude', leftBound: 'closed', rightBound: 'closed'}
         ).coerceTo('array')
     ).setIntersection(
         weatherwayz.table('WeatherPosts').between(
-            req.body.mapRange.min_longitude, req.body.mapRange.max_longitude, 
+            min_longitude, max_longitude, 
             {index: 'longitude', leftBound: 'closed', rightBound: 'closed'}
         ).coerceTo('array')).without('date', 'photo', 'locationText', 'username').
     run(connection, function (err, result){
