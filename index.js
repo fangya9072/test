@@ -210,6 +210,77 @@ app.get('/allposts/:username', (req, res) => {
     })
 })
 
+//get a post by post_id
+app.get('/post/:post_id', (req, res) => {
+    weatherwayz.table('WeatherPosts').get(req.params.post_id).
+    run(connection, function(err, result){
+        if (err) res.send(err);
+        else if (result == null){
+            weatherwayz.table('OutlookPosts').get(req.params.post_id).
+            run(connection, function(err, result){
+                if (err) res.send(err);
+                else res.json(result);
+            })
+        } 
+        else res.json(result);
+    })
+})
+
+//get weather posts within 24hr and indicated coordinate range
+app.get('/rangeposts', (req, res) => {
+    let requestDate = req.body.date.split('-');
+    for (let i=0; i < requestDate.length; i++){
+        requestDate[i] = parseInt(requestDate[i], 10)
+    }
+    //find the 24hr range of time, converting the values for dates which are the 
+    //first days in a month and those that are not
+    if (requestDate[2] == 1) {
+        if (requestDate[1] == 1) {
+            requestDate[0]--;
+            requestDate[1] = 12;
+            requestDate[2] = 31;
+        } else if (requestDate[1] == 3) {
+            requestDate[1]--;
+            if (requestDate[0]%4 == 0) requestDate[2] = 29
+            else requestDate[2] = 28
+        } else if (requestDate[1] == 2 || requestDate[1] == 4 || requestDate[1] == 6 
+            || requestDate[1] == 8 || requestDate[1] == 9 || requestDate[1] == 11){
+                requestDate[2] = 31;
+                requestDate[1]--;
+        } else {
+            requestDate[2] = 30;
+            requestDate[1]--;
+        }
+    } else {
+        requestDate[2] --;
+    }
+    let rangeDate = '';
+    for (let i=0; i < requestDate.length; i++){
+        if (i ==0) rangeDate += ('0000' + requestDate[i].toString(10)).slice(-4);
+        else rangeDate += ('00' + requestDate[i].toString(10)).slice(-2);
+        if (i != requestDate.length - 1){
+            rangeDate += '-';
+        }
+    }
+
+    weatherwayz.table('WeatherPosts').between(
+        rangeDate, req.body.date, {index: 'date', leftBound: 'closed', rightBound: 'closed'}
+    ).coerceTo('array').setIntersection(
+        weatherwayz.table('WeatherPosts').between(
+            req.body.mapRange.min_latitude, req.body.mapRange.max_latitude, 
+            {index: 'latitude', leftBound: 'closed', rightBound: 'closed'}
+        ).coerceTo('array')
+    ).setIntersection(
+        weatherwayz.table('WeatherPosts').between(
+            req.body.mapRange.min_longitude, req.body.mapRange.max_longitude, 
+            {index: 'longitude', leftBound: 'closed', rightBound: 'closed'}
+        ).coerceTo('array')).without('date', 'photo', 'locationText', 'username').
+    run(connection, function (err, result){
+        if (err) res.send(err);
+        else res.json(result)
+    })
+})
+
 //------api calls for table "FriendRequests"------
 
 app.route('/friendrequests/:username')
