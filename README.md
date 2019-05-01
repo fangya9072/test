@@ -28,8 +28,6 @@ Run code
 
 
     $node index.js
-    or 
-    $node index2.js
 
 Once you have already set and installed the environment, you just need the last step to run the code. Note that right now the code is executing, but you cannot quit to keep the server continuing listening. Therefore, we need to make the program run in background. 
 
