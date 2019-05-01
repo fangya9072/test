@@ -1,4 +1,6 @@
-To run index.js, Express.js and Node.js should be installed in the path.  If you run the code on localhost, the address should be "localhost:3000". If you run it on the server, the address should be "http://3.93.183.130:3000/". The steps in README.md works for both server and localhost. However, while there is no other requirements for localhost to run the code, you need to get access to the server to make the code run there. For how to connect to the server, please refer to the private document 'Server Manipulation'. In most cases, code running on localhost is for testing. On your terminal, on the path of the package, 
+To run index.js, Express.js and Node.js should be installed in the path.  If you run the code on localhost, the address should be "localhost:3000". If you run it on the server, the address should be "http://3.93.183.130:3000/". 
+
+The steps in this README.md works for both server and localhost. However, while there is no other requirements for localhost to run the code, you need to get access to the server to make the code run there. For how to connect to the server, please refer to the private document 'Server Manipulation'. In most cases, code running on localhost is for testing. On your terminal, on the path of the package, 
 
 Install NVM 
     
@@ -66,4 +68,5 @@ It will lead you to an editor where you can edit your code. Once the revisions a
     $node index.js
 
 The only thing left is to repeat the step to make the program run in background. 
+
 When it is time for testing the API, just open software 'Postman' or any other software that can send http requests and receive responses to test. For the use of API, please refer to the 'Weatherwayz API Documentation'. 
