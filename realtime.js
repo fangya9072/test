@@ -2,7 +2,7 @@ const express = require('express')
 const bodyParser = require('body-parser');
 const app = express();
 const sockio = require('socket.io');
-const io = sockio.listen(app.listen(3001, () => console.log('Server running on port 3001')))
+const io = sockio(app.listen(3001, () => console.log('Server running on port 3001')))
 //parse application/x-www-form-urlencoded and parse application/json
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
@@ -24,21 +24,31 @@ r.connect( obj2, function(err, conn) {
         throw err;
     }
     connection = conn;
-    //use socket to send realtime location of users who change location
-    r.db('Weatherwayz').table('Users').changes().run(connection, function(err, cursor){
+    //use socket to send realtime location of users who change location to all client
+    r.db('Weatherwayz').table('Users').changes().
+    run(connection, function(err, cursor){
         if (err) throw err;
         else {
             cursor.each(function(err, data){
                 //protect users privacy, don't send their password to front-end
                 let position = {
                     'new_val': {
-                        'username': data.new_val.username, 
+                        'username': data.new_val.username,
                         'location': data.new_val.location
                     }
                 }
                 io.sockets.emit('friendPositions', position);
             })
         }
+    })
+
+    //use socket to receive users who change their locations and update data in database
+    io.on('position', (position) => {
+        console.log(position)
+        // r.db('Weatherwayz').table('Users').update(position).
+        // run(connection, function(err, result) {
+        //     console.log(result);
+        // })
     })
 });
 
