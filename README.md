@@ -36,7 +36,7 @@ Then just let the job run in background.
     
     
     $bg %1
-Note the number following the percentage should match the number given back by Ctrl+Z (the underlined number above). 
+Note the number following the percentage should match the number given back by Ctrl+Z (the number in bracket above). 
 
 Besides, you may also wanted to change the code in index.js and make it re-run on the server. To do this, we need to first kill the previous job that is currently listening on port 3000 or 3001, depending on which api we wanted to edit. 
 
