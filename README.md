@@ -48,6 +48,7 @@ Find such job
     $lsof -i:3001
 
 This will return all jobs that are listening on port indicated with their PID. 
+
 Kill the job
     
     
@@ -58,7 +59,7 @@ Then, you can edit the index.js file.
 
     $nano index.js
 
-Once the revisions are completed, just re-run the code.
+It will lead you to an editor where you can edit your code. Once the revisions are completed, just re-run the code.
 
     $node index.js
 
