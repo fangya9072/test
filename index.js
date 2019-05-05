@@ -114,6 +114,28 @@ app.get('/search', (req, res) => {
       })
 })
 
+//get all users in an indicated range
+//return null if no users in this range
+app.get('/rangeusers', (req, res) => {
+    let min_latitude = parseFloat(req.query.min_latitude);
+    let max_latitude = parseFloat(req.query.max_latitude);
+    let min_longitude = parseFloat(req.query.min_longitude);
+    let max_longitude = parseFloat(req.query.max_longitude);
+    weatherwayz.table('Users').between(
+        min_latitude, max_latitude, 
+        {index: 'latitude', leftBound: 'closed', rightBound: 'closed'}
+    ).coerceTo('array').setIntersection(
+        weatherwayz.table('Users').between(
+            min_longitude, max_longitude, 
+            {index: 'longitude', leftBound: 'closed', rightBound: 'closed'}
+        ).coerceTo('array')).pluck('username', 'location').
+    run(connection, function (err, result){
+        if (err) res.send(err);
+        else if (result.length == 0) res.json(null)
+        else res.json(result);
+    })
+})
+
 //------api calls for table "OutlookPosts"------
 
 app.route('/outlookposts')
@@ -221,7 +243,7 @@ app.get('/post/:post_id', (req, res) => {
                 if (err) res.send(err);
                 else res.json(result);
             })
-        } 
+        }
         else res.json(result);
     })
 })
@@ -281,7 +303,7 @@ app.get('/rangeposts', (req, res) => {
         ).coerceTo('array')).without('date', 'photo', 'locationText', 'username').
     run(connection, function (err, result){
         if (err) res.send(err);
-        else res.json(result)
+        else res.json(result);
     })
 })
 
